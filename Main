@@ -1,14 +1,33 @@
--- GUI Script dla Roblox Executor
+-- GUI Script z Key System dla Roblox Executor
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+-- Lista ważnych kluczy (możesz dodać więcej lub połączyć z API)
+local ValidKeys = {
+    -- Przykładowe klucze - w produkcji powinny być pobierane z serwera
+    "TEST-KEY-12345",
+    "DUCKY-2024-KEY"
+}
+
+-- Funkcja weryfikacji klucza
+local function VerifyKey(key)
+    -- Sprawdź czy klucz jest w liście ważnych kluczy
+    for _, validKey in ipairs(ValidKeys) do
+        if key == validKey then
+            return true
+        end
+    end
+    return false
+end
+
 -- Tworzenie głównego GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "MainGUI"
+ScreenGui.Name = "VerificationGUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = playerGui
@@ -16,9 +35,9 @@ ScreenGui.Parent = playerGui
 -- Główny Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 500, 0, 400)
-MainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+MainFrame.Size = UDim2.new(0, 700, 0, 500)
+MainFrame.Position = UDim2.new(0.5, -350, 0.5, -250)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 MainFrame.BorderSizePixel = 0
 MainFrame.Parent = ScreenGui
 
@@ -33,12 +52,12 @@ UIStroke.Color = Color3.fromRGB(50, 50, 70)
 UIStroke.Thickness = 2
 UIStroke.Parent = MainFrame
 
--- Top Bar (pasek górny)
+-- Top Bar
 local TopBar = Instance.new("Frame")
 TopBar.Name = "TopBar"
-TopBar.Size = UDim2.new(1, 0, 0, 50)
+TopBar.Size = UDim2.new(1, 0, 0, 60)
 TopBar.Position = UDim2.new(0, 0, 0, 0)
-TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainFrame
 
@@ -46,28 +65,41 @@ local TopBarCorner = Instance.new("UICorner")
 TopBarCorner.CornerRadius = UDim.new(0, 12)
 TopBarCorner.Parent = TopBar
 
--- Tytuł
-local Title = Instance.new("TextLabel")
-Title.Name = "Title"
-Title.Size = UDim2.new(1, -100, 1, 0)
-Title.Position = UDim2.new(0, 15, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "Ducky Script"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 20
-Title.Font = Enum.Font.GothamBold
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = TopBar
+-- Tytuł główny
+local MainTitle = Instance.new("TextLabel")
+MainTitle.Name = "MainTitle"
+MainTitle.Size = UDim2.new(0, 200, 1, 0)
+MainTitle.Position = UDim2.new(0, 20, 0, 0)
+MainTitle.BackgroundTransparency = 1
+MainTitle.Text = "Verification"
+MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+MainTitle.TextSize = 24
+MainTitle.Font = Enum.Font.GothamBold
+MainTitle.TextXAlignment = Enum.TextXAlignment.Left
+MainTitle.Parent = TopBar
+
+-- Podtytuł
+local SubTitle = Instance.new("TextLabel")
+SubTitle.Name = "SubTitle"
+SubTitle.Size = UDim2.new(0, 300, 0, 20)
+SubTitle.Position = UDim2.new(0, 20, 0, 35)
+SubTitle.BackgroundTransparency = 1
+SubTitle.Text = "Please enter a valid key"
+SubTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+SubTitle.TextSize = 14
+SubTitle.Font = Enum.Font.Gotham
+SubTitle.TextXAlignment = Enum.TextXAlignment.Left
+SubTitle.Parent = TopBar
 
 -- Przycisk zamknięcia
 local CloseButton = Instance.new("TextButton")
 CloseButton.Name = "CloseButton"
 CloseButton.Size = UDim2.new(0, 40, 0, 40)
-CloseButton.Position = UDim2.new(1, -45, 0, 5)
+CloseButton.Position = UDim2.new(1, -50, 0, 10)
 CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 CloseButton.Text = "✕"
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.TextSize = 18
+CloseButton.TextSize = 20
 CloseButton.Font = Enum.Font.GothamBold
 CloseButton.BorderSizePixel = 0
 CloseButton.Parent = TopBar
@@ -76,74 +108,263 @@ local CloseButtonCorner = Instance.new("UICorner")
 CloseButtonCorner.CornerRadius = UDim.new(0, 8)
 CloseButtonCorner.Parent = CloseButton
 
--- Przycisk minimalizacji
-local MinimizeButton = Instance.new("TextButton")
-MinimizeButton.Name = "MinimizeButton"
-MinimizeButton.Size = UDim2.new(0, 40, 0, 40)
-MinimizeButton.Position = UDim2.new(1, -90, 0, 5)
-MinimizeButton.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
-MinimizeButton.Text = "−"
-MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeButton.TextSize = 18
-MinimizeButton.Font = Enum.Font.GothamBold
-MinimizeButton.BorderSizePixel = 0
-MinimizeButton.Parent = TopBar
+-- Lewy Sidebar
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 180, 1, -60)
+Sidebar.Position = UDim2.new(0, 0, 0, 60)
+Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = MainFrame
 
-local MinimizeButtonCorner = Instance.new("UICorner")
-MinimizeButtonCorner.CornerRadius = UDim.new(0, 8)
-MinimizeButtonCorner.Parent = MinimizeButton
+-- Przycisk Key w sidebarze
+local SidebarKeyButton = Instance.new("TextButton")
+SidebarKeyButton.Name = "SidebarKeyButton"
+SidebarKeyButton.Size = UDim2.new(1, -10, 0, 50)
+SidebarKeyButton.Position = UDim2.new(0, 5, 0, 10)
+SidebarKeyButton.BackgroundColor3 = Color3.fromRGB(50, 100, 200)
+SidebarKeyButton.Text = "Key"
+SidebarKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SidebarKeyButton.TextSize = 16
+SidebarKeyButton.Font = Enum.Font.GothamBold
+SidebarKeyButton.BorderSizePixel = 0
+SidebarKeyButton.Parent = Sidebar
 
--- Zawartość
-local Content = Instance.new("ScrollingFrame")
-Content.Name = "Content"
-Content.Size = UDim2.new(1, -30, 1, -80)
-Content.Position = UDim2.new(0, 15, 0, 65)
-Content.BackgroundTransparency = 1
-Content.BorderSizePixel = 0
-Content.ScrollBarThickness = 6
-Content.Parent = MainFrame
+local SidebarKeyButtonCorner = Instance.new("UICorner")
+SidebarKeyButtonCorner.CornerRadius = UDim.new(0, 8)
+SidebarKeyButtonCorner.Parent = SidebarKeyButton
+
+-- Ikona klucza (emoji jako tekst)
+local KeyIcon = Instance.new("TextLabel")
+KeyIcon.Name = "KeyIcon"
+KeyIcon.Size = UDim2.new(0, 30, 1, 0)
+KeyIcon.Position = UDim2.new(0, 10, 0, 0)
+KeyIcon.BackgroundTransparency = 1
+KeyIcon.Text = "🔑"
+KeyIcon.TextSize = 20
+KeyIcon.Font = Enum.Font.Gotham
+KeyIcon.TextXAlignment = Enum.TextXAlignment.Left
+KeyIcon.Parent = SidebarKeyButton
+
+-- Główna zawartość
+local ContentArea = Instance.new("Frame")
+ContentArea.Name = "ContentArea"
+ContentArea.Size = UDim2.new(1, -180, 1, -60)
+ContentArea.Position = UDim2.new(0, 180, 0, 60)
+ContentArea.BackgroundTransparency = 1
+ContentArea.Parent = MainFrame
+
+local ContentScrolling = Instance.new("ScrollingFrame")
+ContentScrolling.Name = "ContentScrolling"
+ContentScrolling.Size = UDim2.new(1, -30, 1, -20)
+ContentScrolling.Position = UDim2.new(0, 15, 0, 10)
+ContentScrolling.BackgroundTransparency = 1
+ContentScrolling.BorderSizePixel = 0
+ContentScrolling.ScrollBarThickness = 6
+ContentScrolling.Parent = ContentArea
 
 local ContentLayout = Instance.new("UIListLayout")
-ContentLayout.Padding = UDim.new(0, 10)
+ContentLayout.Padding = UDim.new(0, 15)
 ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-ContentLayout.Parent = Content
+ContentLayout.Parent = ContentScrolling
 
--- Przykładowy przycisk
-local ExampleButton = Instance.new("TextButton")
-ExampleButton.Name = "ExampleButton"
-ExampleButton.Size = UDim2.new(1, 0, 0, 50)
-ExampleButton.BackgroundColor3 = Color3.fromRGB(50, 100, 200)
-ExampleButton.Text = "Przykładowy Przycisk"
-ExampleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ExampleButton.TextSize = 16
-ExampleButton.Font = Enum.Font.Gotham
-ExampleButton.BorderSizePixel = 0
-ExampleButton.LayoutOrder = 1
-ExampleButton.Parent = Content
+-- Tytuł sekcji Key
+local KeySectionTitle = Instance.new("TextLabel")
+KeySectionTitle.Name = "KeySectionTitle"
+KeySectionTitle.Size = UDim2.new(1, 0, 0, 30)
+KeySectionTitle.BackgroundTransparency = 1
+KeySectionTitle.Text = "Key"
+KeySectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeySectionTitle.TextSize = 22
+KeySectionTitle.Font = Enum.Font.GothamBold
+KeySectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+KeySectionTitle.LayoutOrder = 1
+KeySectionTitle.Parent = ContentScrolling
 
-local ExampleButtonCorner = Instance.new("UICorner")
-ExampleButtonCorner.CornerRadius = UDim.new(0, 8)
-ExampleButtonCorner.Parent = ExampleButton
+-- Podtytuł Key System
+local KeySystemSubtitle = Instance.new("TextLabel")
+KeySystemSubtitle.Name = "KeySystemSubtitle"
+KeySystemSubtitle.Size = UDim2.new(1, 0, 0, 20)
+KeySystemSubtitle.BackgroundTransparency = 1
+KeySystemSubtitle.Text = "Key System"
+KeySystemSubtitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+KeySystemSubtitle.TextSize = 14
+KeySystemSubtitle.Font = Enum.Font.Gotham
+KeySystemSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+KeySystemSubtitle.LayoutOrder = 2
+KeySystemSubtitle.Parent = ContentScrolling
 
--- Informacja
-local InfoLabel = Instance.new("TextLabel")
-InfoLabel.Name = "InfoLabel"
-InfoLabel.Size = UDim2.new(1, 0, 0, 60)
-InfoLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-InfoLabel.Text = "GUI załadowane pomyślnie!\nMożesz dodać tutaj więcej funkcji."
-InfoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-InfoLabel.TextSize = 14
-InfoLabel.Font = Enum.Font.Gotham
-InfoLabel.TextWrapped = true
-InfoLabel.BorderSizePixel = 0
-InfoLabel.LayoutOrder = 2
-InfoLabel.Parent = Content
+-- Pole input klucza
+local KeyInputFrame = Instance.new("Frame")
+KeyInputFrame.Name = "KeyInputFrame"
+KeyInputFrame.Size = UDim2.new(1, 0, 0, 50)
+KeyInputFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+KeyInputFrame.BorderSizePixel = 0
+KeyInputFrame.LayoutOrder = 3
+KeyInputFrame.Parent = ContentScrolling
 
-local InfoLabelCorner = Instance.new("UICorner")
-InfoLabelCorner.CornerRadius = UDim.new(0, 8)
-InfoLabelCorner.Parent = InfoLabel
+local KeyInputFrameCorner = Instance.new("UICorner")
+KeyInputFrameCorner.CornerRadius = UDim.new(0, 8)
+KeyInputFrameCorner.Parent = KeyInputFrame
 
--- Funkcje
+local KeyInputLabel = Instance.new("TextLabel")
+KeyInputLabel.Name = "KeyInputLabel"
+KeyInputLabel.Size = UDim2.new(0, 80, 1, 0)
+KeyInputLabel.Position = UDim2.new(0, 15, 0, 0)
+KeyInputLabel.BackgroundTransparency = 1
+KeyInputLabel.Text = "Key"
+KeyInputLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyInputLabel.TextSize = 14
+KeyInputLabel.Font = Enum.Font.GothamBold
+KeyInputLabel.TextXAlignment = Enum.TextXAlignment.Left
+KeyInputLabel.Parent = KeyInputFrame
+
+local KeyInputBox = Instance.new("TextBox")
+KeyInputBox.Name = "KeyInputBox"
+KeyInputBox.Size = UDim2.new(1, -110, 1, -20)
+KeyInputBox.Position = UDim2.new(0, 100, 0, 10)
+KeyInputBox.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+KeyInputBox.Text = ""
+KeyInputBox.PlaceholderText = "Enter your key here..."
+KeyInputBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+KeyInputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyInputBox.TextSize = 14
+KeyInputBox.Font = Enum.Font.Gotham
+KeyInputBox.TextXAlignment = Enum.TextXAlignment.Left
+KeyInputBox.ClearTextOnFocus = false
+KeyInputBox.Parent = KeyInputFrame
+
+local KeyInputBoxCorner = Instance.new("UICorner")
+KeyInputBoxCorner.CornerRadius = UDim.new(0, 6)
+KeyInputBoxCorner.Parent = KeyInputBox
+
+-- Przycisk Check Key
+local CheckKeyButton = Instance.new("TextButton")
+CheckKeyButton.Name = "CheckKeyButton"
+CheckKeyButton.Size = UDim2.new(1, 0, 0, 50)
+CheckKeyButton.BackgroundColor3 = Color3.fromRGB(50, 150, 100)
+CheckKeyButton.Text = "Check Key"
+CheckKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CheckKeyButton.TextSize = 16
+CheckKeyButton.Font = Enum.Font.GothamBold
+CheckKeyButton.BorderSizePixel = 0
+CheckKeyButton.LayoutOrder = 4
+CheckKeyButton.Parent = ContentScrolling
+
+local CheckKeyButtonCorner = Instance.new("UICorner")
+CheckKeyButtonCorner.CornerRadius = UDim.new(0, 8)
+CheckKeyButtonCorner.Parent = CheckKeyButton
+
+local CheckKeyDescription = Instance.new("TextLabel")
+CheckKeyDescription.Name = "CheckKeyDescription"
+CheckKeyDescription.Size = UDim2.new(1, -20, 0, 30)
+CheckKeyDescription.Position = UDim2.new(0, 10, 1, 5)
+CheckKeyDescription.BackgroundTransparency = 1
+CheckKeyDescription.Text = "Verifies your key and loads the script."
+CheckKeyDescription.TextColor3 = Color3.fromRGB(180, 180, 180)
+CheckKeyDescription.TextSize = 12
+CheckKeyDescription.Font = Enum.Font.Gotham
+CheckKeyDescription.TextXAlignment = Enum.TextXAlignment.Left
+CheckKeyDescription.Parent = CheckKeyButton
+
+-- Przycisk Get Key Link
+local GetKeyLinkButton = Instance.new("TextButton")
+GetKeyLinkButton.Name = "GetKeyLinkButton"
+GetKeyLinkButton.Size = UDim2.new(1, 0, 0, 50)
+GetKeyLinkButton.BackgroundColor3 = Color3.fromRGB(100, 100, 200)
+GetKeyLinkButton.Text = "Get Key Link"
+GetKeyLinkButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+GetKeyLinkButton.TextSize = 16
+GetKeyLinkButton.Font = Enum.Font.GothamBold
+GetKeyLinkButton.BorderSizePixel = 0
+GetKeyLinkButton.LayoutOrder = 5
+GetKeyLinkButton.Parent = ContentScrolling
+
+local GetKeyLinkButtonCorner = Instance.new("UICorner")
+GetKeyLinkButtonCorner.CornerRadius = UDim.new(0, 8)
+GetKeyLinkButtonCorner.Parent = GetKeyLinkButton
+
+local GetKeyLinkDescription = Instance.new("TextLabel")
+GetKeyLinkDescription.Name = "GetKeyLinkDescription"
+GetKeyLinkDescription.Size = UDim2.new(1, -20, 0, 30)
+GetKeyLinkDescription.Position = UDim2.new(0, 10, 1, 5)
+GetKeyLinkDescription.BackgroundTransparency = 1
+GetKeyLinkDescription.Text = "Copies the link to get a key. Complete the tasks to proceed."
+GetKeyLinkDescription.TextColor3 = Color3.fromRGB(180, 180, 180)
+GetKeyLinkDescription.TextSize = 12
+GetKeyLinkDescription.Font = Enum.Font.Gotham
+GetKeyLinkDescription.TextXAlignment = Enum.TextXAlignment.Left
+GetKeyLinkDescription.Parent = GetKeyLinkButton
+
+-- Przycisk Join Discord
+local JoinDiscordButton = Instance.new("TextButton")
+JoinDiscordButton.Name = "JoinDiscordButton"
+JoinDiscordButton.Size = UDim2.new(1, 0, 0, 50)
+JoinDiscordButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+JoinDiscordButton.Text = "Join Discord"
+JoinDiscordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+JoinDiscordButton.TextSize = 16
+JoinDiscordButton.Font = Enum.Font.GothamBold
+JoinDiscordButton.BorderSizePixel = 0
+JoinDiscordButton.LayoutOrder = 6
+JoinDiscordButton.Parent = ContentScrolling
+
+local JoinDiscordButtonCorner = Instance.new("UICorner")
+JoinDiscordButtonCorner.CornerRadius = UDim.new(0, 8)
+JoinDiscordButtonCorner.Parent = JoinDiscordButton
+
+local JoinDiscordDescription = Instance.new("TextLabel")
+JoinDiscordDescription.Name = "JoinDiscordDescription"
+JoinDiscordDescription.Size = UDim2.new(1, -20, 0, 30)
+JoinDiscordDescription.Position = UDim2.new(0, 10, 1, 5)
+JoinDiscordDescription.BackgroundTransparency = 1
+JoinDiscordDescription.Text = "Join the Discord server. By reaching 10 you can get the key for free, without using Lootlabs."
+JoinDiscordDescription.TextColor3 = Color3.fromRGB(180, 180, 180)
+JoinDiscordDescription.TextSize = 12
+JoinDiscordDescription.Font = Enum.Font.Gotham
+JoinDiscordDescription.TextXAlignment = Enum.TextXAlignment.Left
+JoinDiscordDescription.Parent = JoinDiscordButton
+
+-- Sekcja Important - Avoid Scams
+local ImportantFrame = Instance.new("Frame")
+ImportantFrame.Name = "ImportantFrame"
+ImportantFrame.Size = UDim2.new(1, 0, 0, 180)
+ImportantFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+ImportantFrame.BorderSizePixel = 0
+ImportantFrame.LayoutOrder = 7
+ImportantFrame.Parent = ContentScrolling
+
+local ImportantFrameCorner = Instance.new("UICorner")
+ImportantFrameCorner.CornerRadius = UDim.new(0, 8)
+ImportantFrameCorner.Parent = ImportantFrame
+
+local ImportantTitle = Instance.new("TextLabel")
+ImportantTitle.Name = "ImportantTitle"
+ImportantTitle.Size = UDim2.new(1, -40, 0, 30)
+ImportantTitle.Position = UDim2.new(0, 15, 0, 10)
+ImportantTitle.BackgroundTransparency = 1
+ImportantTitle.Text = "⚠ Important - Avoid Scams"
+ImportantTitle.TextColor3 = Color3.fromRGB(255, 200, 50)
+ImportantTitle.TextSize = 16
+ImportantTitle.Font = Enum.Font.GothamBold
+ImportantTitle.TextXAlignment = Enum.TextXAlignment.Left
+ImportantTitle.Parent = ImportantFrame
+
+local ImportantText = Instance.new("TextLabel")
+ImportantText.Name = "ImportantText"
+ImportantText.Size = UDim2.new(1, -30, 1, -50)
+ImportantText.Position = UDim2.new(0, 15, 0, 40)
+ImportantText.BackgroundTransparency = 1
+ImportantText.Text = "• The key is obtained from the Platoboost link.\n• Join the Discord for help, keys, and updates.\n• This script is on https://rscripts.net/@duckyscripts, don't trust people who make youtube videos claiming it to be theirs.\n• If anyone asks you to:\n  - Watch YouTube videos for keys\n  - Pay for the key\n  DANT khanh Binaandinnenme Bia Bosn"
+ImportantText.TextColor3 = Color3.fromRGB(200, 200, 200)
+ImportantText.TextSize = 12
+ImportantText.Font = Enum.Font.Gotham
+ImportantText.TextXAlignment = Enum.TextXAlignment.Left
+ImportantText.TextYAlignment = Enum.TextYAlignment.Top
+ImportantText.TextWrapped = true
+ImportantText.Parent = ImportantFrame
+
+-- Funkcje przeciągania
 local dragging = false
 local dragStart = nil
 local startPos = nil
@@ -174,51 +395,91 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
+-- Funkcja weryfikacji i ładowania skryptu
+local function LoadScript()
+    -- Tutaj możesz załadować główny skrypt po weryfikacji
+    print("Key verified! Loading script...")
+    -- Przykład: loadstring(game:HttpGet("URL_DO_SKRYPTU"))()
+    -- Możesz też pokazać nowe GUI z funkcjami skryptu
+end
+
+-- Obsługa przycisków
 CloseButton.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
-local minimized = false
-MinimizeButton.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    if minimized then
-        Content.Visible = false
-        MainFrame.Size = UDim2.new(0, 500, 0, 50)
+CheckKeyButton.MouseButton1Click:Connect(function()
+    local enteredKey = KeyInputBox.Text
+    if enteredKey == "" then
+        -- Animacja błędu
+        KeyInputBox.Text = ""
+        KeyInputBox.PlaceholderText = "Please enter a key!"
+        TweenService:Create(KeyInputBox, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
+        wait(0.1)
+        TweenService:Create(KeyInputBox, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(30, 30, 40)}):Play()
+        KeyInputBox.PlaceholderText = "Enter your key here..."
+        return
+    end
+    
+    if VerifyKey(enteredKey) then
+        -- Klucz poprawny
+        CheckKeyButton.Text = "Key Verified!"
+        CheckKeyButton.BackgroundColor3 = Color3.fromRGB(50, 200, 100)
+        LoadScript()
+        wait(1)
+        ScreenGui:Destroy() -- Zamknij GUI weryfikacji
     else
-        Content.Visible = true
-        MainFrame.Size = UDim2.new(0, 500, 0, 400)
+        -- Klucz niepoprawny
+        CheckKeyButton.Text = "Invalid Key!"
+        CheckKeyButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        KeyInputBox.Text = ""
+        wait(1)
+        CheckKeyButton.Text = "Check Key"
+        CheckKeyButton.BackgroundColor3 = Color3.fromRGB(50, 150, 100)
     end
 end)
 
--- Efekt hover na przyciskach
-ExampleButton.MouseEnter:Connect(function()
-    TweenService:Create(ExampleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 120, 240)}):Play()
+GetKeyLinkButton.MouseButton1Click:Connect(function()
+    -- Tutaj możesz dodać link do Platoboost
+    local keyLink = "https://example.com/get-key" -- Zamień na prawdziwy link
+    pcall(function()
+        setclipboard(keyLink)
+    end)
+    GetKeyLinkButton.Text = "Link Copied!"
+    wait(1)
+    GetKeyLinkButton.Text = "Get Key Link"
 end)
 
-ExampleButton.MouseLeave:Connect(function()
-    TweenService:Create(ExampleButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 100, 200)}):Play()
+JoinDiscordButton.MouseButton1Click:Connect(function()
+    -- Tutaj możesz dodać link do Discord
+    local discordLink = "https://discord.gg/example" -- Zamień na prawdziwy link
+    pcall(function()
+        setclipboard(discordLink)
+    end)
+    JoinDiscordButton.Text = "Link Copied!"
+    wait(1)
+    JoinDiscordButton.Text = "Join Discord"
 end)
 
-CloseButton.MouseEnter:Connect(function()
-    TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
-end)
+-- Efekty hover
+local function AddHoverEffect(button, normalColor, hoverColor)
+    button.MouseEnter:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = hoverColor}):Play()
+    end)
+    button.MouseLeave:Connect(function()
+        TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = normalColor}):Play()
+    end)
+end
 
-CloseButton.MouseLeave:Connect(function()
-    TweenService:Create(CloseButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
-end)
+AddHoverEffect(CloseButton, Color3.fromRGB(200, 50, 50), Color3.fromRGB(255, 70, 70))
+AddHoverEffect(CheckKeyButton, Color3.fromRGB(50, 150, 100), Color3.fromRGB(60, 180, 120))
+AddHoverEffect(GetKeyLinkButton, Color3.fromRGB(100, 100, 200), Color3.fromRGB(120, 120, 240))
+AddHoverEffect(JoinDiscordButton, Color3.fromRGB(88, 101, 242), Color3.fromRGB(105, 115, 255))
+AddHoverEffect(SidebarKeyButton, Color3.fromRGB(50, 100, 200), Color3.fromRGB(60, 120, 240))
 
-MinimizeButton.MouseEnter:Connect(function()
-    TweenService:Create(MinimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(240, 180, 70)}):Play()
-end)
-
-MinimizeButton.MouseLeave:Connect(function()
-    TweenService:Create(MinimizeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 150, 50)}):Play()
-end)
-
--- Aktualizacja rozmiaru Content
+-- Aktualizacja rozmiaru ContentScrolling
 ContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    Content.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 10)
+    ContentScrolling.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
 end)
 
-print("GUI załadowane!")
-
+print("Verification GUI załadowane!")
