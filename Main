@@ -1,4 +1,4 @@
--- GUI Script z Key System dla Roblox Executor
+-- GUI Script z Key System dla Roblox Executor - 1:1 z zrzutu ekranu
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -117,13 +117,13 @@ Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 Sidebar.BorderSizePixel = 0
 Sidebar.Parent = MainFrame
 
--- Przycisk Key w sidebarze
+-- Przycisk Key w sidebarze (zaznaczony/aktywny)
 local SidebarKeyButton = Instance.new("TextButton")
 SidebarKeyButton.Name = "SidebarKeyButton"
 SidebarKeyButton.Size = UDim2.new(1, -10, 0, 50)
 SidebarKeyButton.Position = UDim2.new(0, 5, 0, 10)
 SidebarKeyButton.BackgroundColor3 = Color3.fromRGB(50, 100, 200)
-SidebarKeyButton.Text = "Key"
+SidebarKeyButton.Text = ""
 SidebarKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 SidebarKeyButton.TextSize = 16
 SidebarKeyButton.Font = Enum.Font.GothamBold
@@ -134,17 +134,48 @@ local SidebarKeyButtonCorner = Instance.new("UICorner")
 SidebarKeyButtonCorner.CornerRadius = UDim.new(0, 8)
 SidebarKeyButtonCorner.Parent = SidebarKeyButton
 
--- Ikona klucza (emoji jako tekst)
+-- Ikona klucza i zamka w sidebarze
+local KeyIconFrame = Instance.new("Frame")
+KeyIconFrame.Name = "KeyIconFrame"
+KeyIconFrame.Size = UDim2.new(0, 30, 0, 30)
+KeyIconFrame.Position = UDim2.new(0, 15, 0, 10)
+KeyIconFrame.BackgroundTransparency = 1
+KeyIconFrame.Parent = SidebarKeyButton
+
 local KeyIcon = Instance.new("TextLabel")
 KeyIcon.Name = "KeyIcon"
-KeyIcon.Size = UDim2.new(0, 30, 1, 0)
-KeyIcon.Position = UDim2.new(0, 10, 0, 0)
+KeyIcon.Size = UDim2.new(1, 0, 0, 20)
+KeyIcon.Position = UDim2.new(0, 0, 0, 0)
 KeyIcon.BackgroundTransparency = 1
 KeyIcon.Text = "🔑"
-KeyIcon.TextSize = 20
+KeyIcon.TextSize = 18
 KeyIcon.Font = Enum.Font.Gotham
 KeyIcon.TextXAlignment = Enum.TextXAlignment.Left
-KeyIcon.Parent = SidebarKeyButton
+KeyIcon.Parent = KeyIconFrame
+
+local LockIcon = Instance.new("TextLabel")
+LockIcon.Name = "LockIcon"
+LockIcon.Size = UDim2.new(1, 0, 0, 20)
+LockIcon.Position = UDim2.new(0, 0, 0, 10)
+LockIcon.BackgroundTransparency = 1
+LockIcon.Text = "🔒"
+LockIcon.TextSize = 18
+LockIcon.Font = Enum.Font.Gotham
+LockIcon.TextXAlignment = Enum.TextXAlignment.Left
+LockIcon.Parent = KeyIconFrame
+
+-- Tekst "Key" w sidebarze
+local SidebarKeyText = Instance.new("TextLabel")
+SidebarKeyText.Name = "SidebarKeyText"
+SidebarKeyText.Size = UDim2.new(1, -50, 1, 0)
+SidebarKeyText.Position = UDim2.new(0, 50, 0, 0)
+SidebarKeyText.BackgroundTransparency = 1
+SidebarKeyText.Text = "Key"
+SidebarKeyText.TextColor3 = Color3.fromRGB(255, 255, 255)
+SidebarKeyText.TextSize = 16
+SidebarKeyText.Font = Enum.Font.GothamBold
+SidebarKeyText.TextXAlignment = Enum.TextXAlignment.Left
+SidebarKeyText.Parent = SidebarKeyButton
 
 -- Główna zawartość
 local ContentArea = Instance.new("Frame")
