@@ -1,11 +1,12 @@
--- PREMIUM ROBLOX EXECUTOR KEY SYSTEM UI
+-- TRANSPARENT PREMIUM KEY SYSTEM UI (EXECUTOR)
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.ResetOnSpawn = false
 
--- ====== CONFIG ======
+-- ===== CONFIG =====
 local VALID_KEYS = {
     "TEST-KEY-12345",
     "DUCKY-2024-KEY"
@@ -15,22 +16,25 @@ local KEY_LINK = "https://example.com/getkey"
 local DISCORD_LINK = "https://discord.gg/example"
 
 local function LoadScript()
-    print("🚀 MAIN SCRIPT LOADED")
-    -- loadstring(game:HttpGet("URL"))()
+    print("KEY VERIFIED - MAIN SCRIPT LOADED")
 end
 
--- ====== UTILS ======
+-- ===== UTILS =====
 local function round(ui, r)
     local c = Instance.new("UICorner", ui)
     c.CornerRadius = UDim.new(0, r)
 end
 
-local function hover(btn, normal, hover)
+local function hover(btn, normal, over)
     btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = hover}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = over
+        }):Play()
     end)
     btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = normal}):Play()
+        TweenService:Create(btn, TweenInfo.new(0.15), {
+            BackgroundColor3 = normal
+        }):Play()
     end)
 end
 
@@ -41,142 +45,143 @@ local function verify(key)
     return false
 end
 
--- ====== GUI ======
-local gui = Instance.new("ScreenGui", PlayerGui)
-gui.ResetOnSpawn = false
-
+-- ===== MAIN =====
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 620, 0, 420)
-main.Position = UDim2.new(0.5, -310, 0.5, -210)
-main.BackgroundColor3 = Color3.fromRGB(28,28,38)
+main.Size = UDim2.new(0, 520, 0, 520)
+main.Position = UDim2.new(0.5, -260, 0.5, -260)
+main.BackgroundColor3 = Color3.fromRGB(20,20,26)
+main.BackgroundTransparency = 0.15
 main.BorderSizePixel = 0
-round(main, 14)
+main.ZIndex = 10
+round(main, 16)
 
-TweenService:Create(main, TweenInfo.new(0.35, Enum.EasingStyle.Quint), {
-    Size = UDim2.new(0, 620, 0, 420)
-}):Play()
+-- ===== CATEGORY =====
+local category = Instance.new("TextLabel", main)
+category.Text = "Key"
+category.Font = Enum.Font.GothamBold
+category.TextSize = 14
+category.TextColor3 = Color3.fromRGB(255,255,255)
+category.BackgroundColor3 = Color3.fromRGB(40,40,52)
+category.BackgroundTransparency = 0.2
+category.Size = UDim2.new(0, 60, 0, 28)
+category.Position = UDim2.new(0, 20, 0, 20)
+category.BorderSizePixel = 0
+round(category, 10)
 
--- ====== SIDEBAR ======
-local side = Instance.new("Frame", main)
-side.Size = UDim2.new(0, 190, 1, 0)
-side.BackgroundColor3 = Color3.fromRGB(22,22,30)
-side.BorderSizePixel = 0
-round(side, 14)
+-- ===== TITLES =====
+local title = Instance.new("TextLabel", main)
+title.Text = "Key"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 26
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
+title.Position = UDim2.new(0, 20, 0, 70)
+title.Size = UDim2.new(1, -40, 30)
+title.TextXAlignment = Enum.TextXAlignment.Left
 
-local sideTitle = Instance.new("TextLabel", side)
-sideTitle.Text = "🔑 Key System"
-sideTitle.Font = Enum.Font.GothamBold
-sideTitle.TextSize = 18
-sideTitle.TextColor3 = Color3.fromRGB(255,255,255)
-sideTitle.BackgroundTransparency = 1
-sideTitle.Position = UDim2.new(0, 20, 0, 25)
-sideTitle.Size = UDim2.new(1, -40, 30)
-sideTitle.TextXAlignment = Left
+local subtitle = Instance.new("TextLabel", main)
+subtitle.Text = "Key System"
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextSize = 14
+subtitle.TextColor3 = Color3.fromRGB(160,160,160)
+subtitle.BackgroundTransparency = 1
+subtitle.Position = UDim2.new(0, 20, 0, 105)
+subtitle.Size = UDim2.new(1, -40, 20)
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
 
--- ====== CONTENT ======
-local content = Instance.new("Frame", main)
-content.Position = UDim2.new(0, 190, 0, 0)
-content.Size = UDim2.new(1, -190, 1, 0)
-content.BackgroundTransparency = 1
+-- ===== KEY INPUT =====
+local keyBox = Instance.new("TextBox", main)
+keyBox.PlaceholderText = "Key / Enter your key here..."
+keyBox.Text = ""
+keyBox.Font = Enum.Font.Gotham
+keyBox.TextSize = 14
+keyBox.TextColor3 = Color3.fromRGB(255,255,255)
+keyBox.PlaceholderColor3 = Color3.fromRGB(140,140,140)
+keyBox.BackgroundColor3 = Color3.fromRGB(36,36,48)
+keyBox.BackgroundTransparency = 0.1
+keyBox.BorderSizePixel = 0
+keyBox.Position = UDim2.new(0, 20, 0, 150)
+keyBox.Size = UDim2.new(1, -40, 46)
+round(keyBox, 12)
 
-local layoutY = 40
-local function section(title)
-    local t = Instance.new("TextLabel", content)
-    t.Text = title
+-- ===== BUTTON MAKER =====
+local function bigButton(y, height, text, desc, color, hoverColor, callback)
+    local frame = Instance.new("Frame", main)
+    frame.Position = UDim2.new(0, 20, 0, y)
+    frame.Size = UDim2.new(1, -40, 0, height)
+    frame.BackgroundColor3 = color
+    frame.BorderSizePixel = 0
+    round(frame, 14)
+
+    local btn = Instance.new("TextButton", frame)
+    btn.Size = UDim2.new(1,0,1,0)
+    btn.Text = ""
+    btn.BackgroundTransparency = 1
+
+    local t = Instance.new("TextLabel", frame)
+    t.Text = text
     t.Font = Enum.Font.GothamBold
     t.TextSize = 16
     t.TextColor3 = Color3.fromRGB(255,255,255)
     t.BackgroundTransparency = 1
-    t.Position = UDim2.new(0, 30, 0, layoutY)
-    t.Size = UDim2.new(1, -60, 24)
-    t.TextXAlignment = Left
-    layoutY += 34
+    t.Position = UDim2.new(0, 18, 0, 12)
+    t.Size = UDim2.new(1, -36, 22)
+    t.TextXAlignment = Enum.TextXAlignment.Left
+
+    local d = Instance.new("TextLabel", frame)
+    d.Text = desc
+    d.Font = Enum.Font.Gotham
+    d.TextSize = 12
+    d.TextWrapped = true
+    d.TextColor3 = Color3.fromRGB(170,170,170)
+    d.BackgroundTransparency = 1
+    d.Position = UDim2.new(0, 18, 0, 38)
+    d.Size = UDim2.new(1, -36, height - 44)
+    d.TextXAlignment = Enum.TextXAlignment.Left
+    d.TextYAlignment = Enum.TextYAlignment.Top
+
+    hover(frame, color, hoverColor)
+    btn.MouseButton1Click:Connect(callback)
 end
 
-local function listButton(text, sub, callback)
-    local f = Instance.new("Frame", content)
-    f.Position = UDim2.new(0, 30, 0, layoutY)
-    f.Size = UDim2.new(1, -60, 60)
-    f.BackgroundColor3 = Color3.fromRGB(34,34,46)
-    f.BorderSizePixel = 0
-    round(f, 10)
-
-    local b = Instance.new("TextButton", f)
-    b.Size = UDim2.new(1,0,1,0)
-    b.Text = ""
-    b.BackgroundTransparency = 1
-
-    local t = Instance.new("TextLabel", f)
-    t.Text = text
-    t.Font = Enum.Font.GothamMedium
-    t.TextSize = 14
-    t.TextColor3 = Color3.fromRGB(255,255,255)
-    t.Position = UDim2.new(0, 16, 0, 10)
-    t.Size = UDim2.new(1, -40, 20)
-    t.BackgroundTransparency = 1
-    t.TextXAlignment = Left
-
-    local s = Instance.new("TextLabel", f)
-    s.Text = sub
-    s.Font = Enum.Font.Gotham
-    s.TextSize = 12
-    s.TextColor3 = Color3.fromRGB(170,170,170)
-    s.Position = UDim2.new(0, 16, 0, 32)
-    s.Size = UDim2.new(1, -40, 18)
-    s.BackgroundTransparency = 1
-    s.TextXAlignment = Left
-
-    hover(f, f.BackgroundColor3, Color3.fromRGB(44,44,60))
-    b.MouseButton1Click:Connect(callback)
-
-    layoutY += 72
-end
-
--- ====== SECTIONS ======
-section("Enter your key")
-
-local keyBox = Instance.new("TextBox", content)
-keyBox.Position = UDim2.new(0, 30, 0, layoutY)
-keyBox.Size = UDim2.new(1, -60, 42)
-keyBox.PlaceholderText = "Enter key here..."
-keyBox.Text = ""
-keyBox.TextColor3 = Color3.fromRGB(255,255,255)
-keyBox.PlaceholderColor3 = Color3.fromRGB(150,150,150)
-keyBox.Font = Enum.Font.Gotham
-keyBox.TextSize = 13
-keyBox.BackgroundColor3 = Color3.fromRGB(34,34,46)
-keyBox.BorderSizePixel = 0
-round(keyBox, 8)
-layoutY += 60
-
-listButton("Check Key", "Verify your access", function()
-    if verify(keyBox.Text) then
-        LoadScript()
-        gui:Destroy()
-    else
-        keyBox.Text = ""
-        keyBox.PlaceholderText = "Invalid key!"
+-- ===== BUTTONS =====
+bigButton(
+    210, 60,
+    "Check Key",
+    "",
+    Color3.fromRGB(34,197,94),
+    Color3.fromRGB(74,222,128),
+    function()
+        if verify(keyBox.Text) then
+            LoadScript()
+            gui:Destroy()
+        else
+            keyBox.Text = ""
+            keyBox.PlaceholderText = "Invalid key!"
+        end
     end
-end)
+)
 
-listButton("Get Key", "Open key website", function()
-    setclipboard(KEY_LINK)
-end)
+bigButton(
+    290, 86,
+    "Get Key Link",
+    "Copies the link to get a key. Complete the tasks to proceed.",
+    Color3.fromRGB(46,46,60),
+    Color3.fromRGB(60,60,78),
+    function()
+        setclipboard(KEY_LINK)
+    end
+)
 
-listButton("Join Discord", "Support & updates", function()
-    setclipboard(DISCORD_LINK)
-end)
+bigButton(
+    390, 100,
+    "Join Discord",
+    "Join the discord server by reaching level 10 you can get key for free without using Lootlabs",
+    Color3.fromRGB(88,101,242),
+    Color3.fromRGB(110,120,255),
+    function()
+        setclipboard(DISCORD_LINK)
+    end
+)
 
-section("Important")
-
-local warn = Instance.new("TextLabel", content)
-warn.Text = "⚠ Avoid scams. Never download files or run unknown scripts."
-warn.Font = Enum.Font.Gotham
-warn.TextSize = 12
-warn.TextWrapped = true
-warn.TextColor3 = Color3.fromRGB(255,200,80)
-warn.BackgroundTransparency = 1
-warn.Position = UDim2.new(0, 30, 0, layoutY)
-warn.Size = UDim2.new(1, -60, 40)
-
-print("✅ Premium Key System UI Loaded")
+print("✅ Transparent Key System UI Loaded")
